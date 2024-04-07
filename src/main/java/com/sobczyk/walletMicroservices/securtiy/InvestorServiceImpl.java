@@ -31,10 +31,10 @@ public class InvestorServiceImpl implements InvestorService {
     private final AuthenticationManager authenticationManager;
 
     @Override
-    public AuthenticationResponse registerInvestor(RegisterRequest request) {
-//        if (investorRepository.findByEmail(request.email()).isPresent()) {
-//            return ResponseEntity.status(HttpStatus.CONFLICT).body("Email already exists");
-//        }
+    public ResponseEntity<?> registerInvestor(RegisterRequest request) {
+        if (investorRepository.findByEmail(request.email()).isPresent()) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Email already exists");
+        }
         Investor investor = Investor.builder()
                 .firstname(request.firstname())
                 .lastname(request.lastname())
@@ -44,9 +44,9 @@ public class InvestorServiceImpl implements InvestorService {
                 .build();
         investorRepository.save(investor);
         var jwt = jwtService.generateToken(investor);
-        return AuthenticationResponse.builder()
+        return ResponseEntity.ok(AuthenticationResponse.builder()
                 .token(jwt)
-                .build();
+                .build());
     }
 
     @Override

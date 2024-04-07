@@ -9,7 +9,7 @@ import org.springframework.http.ResponseEntity;
 import java.util.List;
 
 public interface InvestorService {
-    AuthenticationResponse registerInvestor(RegisterRequest request);
+    ResponseEntity<?> registerInvestor(RegisterRequest request);
 
     ResponseEntity<?> findInvestorByEmail(String email);
 

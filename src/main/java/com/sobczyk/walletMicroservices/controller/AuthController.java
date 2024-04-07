@@ -16,8 +16,8 @@ public class AuthController {
     private final InvestorServiceImpl service;
 
     @PostMapping("/register")
-    public ResponseEntity<AuthenticationResponse> register(@RequestBody RegisterRequest request) {
-        return ResponseEntity.ok(service.registerInvestor(request));
+    public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
+        return service.registerInvestor(request);
     }
 
     @PostMapping("/authenticate")
