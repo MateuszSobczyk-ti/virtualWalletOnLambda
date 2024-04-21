@@ -1,5 +1,15 @@
 version: "3"
 services:
+  backend-service:
+    image: 91059/walletapp:v2
+    ports:
+      - "8080:8080"
+    networks:
+      - spring-db-network
+      - postgres
+    depends_on:
+      - postgres
+
   postgres:
     container_name: postgres
     image: postgres
