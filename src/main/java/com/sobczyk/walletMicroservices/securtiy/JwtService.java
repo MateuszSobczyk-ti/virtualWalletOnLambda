@@ -1,4 +1,4 @@
-package com.sobczyk.walletMicroservices.service;
+package com.sobczyk.walletMicroservices.securtiy;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

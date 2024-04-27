@@ -2,7 +2,7 @@ package com.sobczyk.walletMicroservices.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Getter
@@ -18,12 +18,14 @@ public class Transaction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @ManyToOne
-    private Position position;
-    private Double transaction_quantity;
-    private Double after_transaction_quantity; //autocomplete!
-    private Double purchase_price;
-    private Double total_amount; //autocomplete!
-    private Double trading_fees;
+    private Asset asset;
+    @Enumerated(EnumType.STRING)
+    private TransactionType transactionType;
+    private BigDecimal transaction_quantity;
+    private BigDecimal after_transaction_quantity; //autocomplete!
+    private BigDecimal purchase_price;
+    private BigDecimal total_amount; //autocomplete!
+    private BigDecimal trading_fees;
     private LocalDateTime transaction_date;
     private String description;
 

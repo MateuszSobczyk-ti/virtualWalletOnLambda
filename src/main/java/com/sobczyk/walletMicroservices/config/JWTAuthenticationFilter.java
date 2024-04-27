@@ -1,7 +1,7 @@
 package com.sobczyk.walletMicroservices.config;
 
 import com.sobczyk.walletMicroservices.repository.InvestorRepository;
-import com.sobczyk.walletMicroservices.service.JwtService;
+import com.sobczyk.walletMicroservices.securtiy.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

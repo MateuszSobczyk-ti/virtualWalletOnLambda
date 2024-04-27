@@ -1,4 +1,4 @@
-package com.sobczyk.walletMicroservices.dto;
+package com.sobczyk.walletMicroservices.dto.responses;
 
 import lombok.Builder;
 

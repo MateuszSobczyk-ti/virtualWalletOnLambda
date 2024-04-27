@@ -3,6 +3,7 @@ package com.sobczyk.walletMicroservices.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Getter
@@ -17,10 +18,9 @@ public class Position {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Enumerated(EnumType.STRING)
-    private AssetType assetType;
-    private String ticker;
-    private Double amount;
+    @ManyToOne
+    private Asset asset;
+    private BigDecimal amount;
     private LocalDateTime opened_at;
     private LocalDateTime closed_at;
 }
