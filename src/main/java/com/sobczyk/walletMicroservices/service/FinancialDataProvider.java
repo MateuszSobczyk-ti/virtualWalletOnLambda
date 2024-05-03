@@ -32,7 +32,11 @@ public class FinancialDataProvider {
                         .toDate(LocalDate.now().toString())
                         .build()
         );
-        aggs.getResults().forEach(this::convertToMap);
+        if (PositionPerfSummaryService.TICKER_DEPOSITED.equals(ticker)) {
+            this.generateCashPrice();
+        } else {
+            aggs.getResults().forEach(this::convertToMap);
+        }
         return priceMap;
     }
 
@@ -43,5 +47,14 @@ public class FinancialDataProvider {
 
     private LocalDate convertToDate(Long mSec) {
         return Instant.ofEpochMilli(mSec).atZone(ZoneId.systemDefault()).toLocalDate();
+    }
+
+    private void generateCashPrice() {
+        //first priceMap must be loaded
+        Map<PositionPerfKey, BigDecimal> cashPriceMap = new HashMap<>();
+        this.priceMap.forEach((key, value) -> cashPriceMap.putIfAbsent(
+            new PositionPerfKey(key.getDate(), PositionPerfSummaryService.TICKER_DEPOSITED),
+            BigDecimal.ONE));
+        this.priceMap.putAll(cashPriceMap);
     }
 }
