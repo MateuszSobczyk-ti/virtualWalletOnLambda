@@ -1,16 +1,17 @@
 package com.sobczyk.walletMicroservices.dto.requests;
 
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 public record TransactionRequest(@NotEmpty String ticker,
-                                 @NotEmpty Integer assetType,
-                                 @NotEmpty Integer transactionType,
-                                 @NotEmpty BigDecimal quantity,
-                                 @NotEmpty BigDecimal price,
-                                 @NotEmpty BigDecimal fees,
-                                 @NotEmpty LocalDateTime date,
-                                 @NotEmpty String description) {
+                                 @NotNull Integer assetType,
+                                 @NotNull Integer transactionType,
+                                 @NotNull BigDecimal quantity,
+                                 @NotNull BigDecimal price,
+                                 BigDecimal fees,
+                                 @NotNull LocalDate date,
+                                 String description) {
 }
