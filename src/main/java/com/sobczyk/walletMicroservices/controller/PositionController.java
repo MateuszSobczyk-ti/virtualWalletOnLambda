@@ -4,7 +4,7 @@ import com.sobczyk.walletMicroservices.dto.requests.PositionPerformanceRequest;
 import com.sobczyk.walletMicroservices.dto.requests.TransactionRequest;
 import com.sobczyk.walletMicroservices.dto.responses.PostionPerformanceResponse;
 import com.sobczyk.walletMicroservices.entity.Investor;
-import com.sobczyk.walletMicroservices.service.PositionPerformanceService;
+import com.sobczyk.walletMicroservices.service.PositionPerfService;
 import com.sobczyk.walletMicroservices.service.TransactionService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -20,7 +20,7 @@ import java.util.List;
 public class PositionController {
 
     private final TransactionService transactionService;
-    private final PositionPerformanceService positionPerformanceService;
+    private final PositionPerfService positionPerfService;
 
     @PostMapping("/transaction")
     public ResponseEntity<?> saveTransaction(@AuthenticationPrincipal Investor investor,
@@ -31,6 +31,6 @@ public class PositionController {
     @GetMapping("/performance")
     public ResponseEntity<List<PostionPerformanceResponse>> getPositionPerformance(@AuthenticationPrincipal Investor investor,
                                                                                    @RequestBody PositionPerformanceRequest request) {
-        return positionPerformanceService.getPositionPerformance(investor, request);
+        return positionPerfService.getPositionPerformance(investor, request);
     }
 }

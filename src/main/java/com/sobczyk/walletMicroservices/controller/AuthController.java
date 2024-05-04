@@ -2,7 +2,7 @@ package com.sobczyk.walletMicroservices.controller;
 
 import com.sobczyk.walletMicroservices.dto.requests.AuthenticationRequest;
 import com.sobczyk.walletMicroservices.dto.responses.AuthenticationResponse;
-import com.sobczyk.walletMicroservices.dto.RegisterRequest;
+import com.sobczyk.walletMicroservices.dto.requests.RegisterRequest;
 import com.sobczyk.walletMicroservices.securtiy.InvestorServiceImpl;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;

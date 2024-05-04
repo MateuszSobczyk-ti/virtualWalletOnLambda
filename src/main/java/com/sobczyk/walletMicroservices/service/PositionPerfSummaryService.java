@@ -1,5 +1,8 @@
 package com.sobczyk.walletMicroservices.service;
 
+import com.sobczyk.walletMicroservices.position.performance.PositionPerfKey;
+import com.sobczyk.walletMicroservices.position.performance.PositionPerfValue;
+import com.sobczyk.walletMicroservices.position.performance.TimeSeries;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -11,7 +14,7 @@ import java.util.Map;
 public class PositionPerfSummaryService {
 
     public static final String TICKER_OVERALL = "OVERALL";
-    public static final String TICKER_DEPOSITED = "DEPOSITED";
+    public static final String TICKER_DEPOSITED = "_DEPOSITED";
     public static final String TICKER_CASH = "CASH";
 
     public Map<PositionPerfKey, PositionPerfValue> generateOverallPosition(TimeSeries timeSeries, Map<PositionPerfKey, PositionPerfValue> positionsMap) {

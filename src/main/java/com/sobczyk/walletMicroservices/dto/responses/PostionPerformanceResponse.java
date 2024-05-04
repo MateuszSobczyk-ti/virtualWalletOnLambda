@@ -13,18 +13,18 @@ public class PostionPerformanceResponse {
     private LocalDate date;
     private String ticker;
     private BigDecimal quantity;
-    private BigDecimal purchasingPrice;
     private BigDecimal investedValue;
-    private BigDecimal tradingFees;
     private BigDecimal marketValue;
     private BigDecimal TWR;
 
     public PostionPerformanceResponse() {
+        clearValues();
+    }
+
+    public void clearValues() {
         quantity = BigDecimal.ZERO;
         marketValue = BigDecimal.ZERO;
         investedValue = BigDecimal.ZERO;
-        purchasingPrice = BigDecimal.ZERO;
-        tradingFees = BigDecimal.ZERO;
         TWR = BigDecimal.ZERO;
     }
 }

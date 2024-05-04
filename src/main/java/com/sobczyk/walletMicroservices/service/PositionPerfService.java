@@ -5,6 +5,9 @@ import com.sobczyk.walletMicroservices.dto.responses.PostionPerformanceResponse;
 import com.sobczyk.walletMicroservices.entity.Investor;
 import com.sobczyk.walletMicroservices.entity.Transaction;
 import com.sobczyk.walletMicroservices.entity.TransactionType;
+import com.sobczyk.walletMicroservices.position.performance.PositionPerfKey;
+import com.sobczyk.walletMicroservices.position.performance.PositionPerfValue;
+import com.sobczyk.walletMicroservices.position.performance.TimeSeries;
 import com.sobczyk.walletMicroservices.repository.TransactionRepository;
 import lombok.*;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +19,7 @@ import java.util.*;
 
 @Service
 @RequiredArgsConstructor
-public class PositionPerformanceService {
+public class PositionPerfService {
 
     private final TransactionRepository transactionRepository;
     private final FinancialDataProvider financialDataProvider;
@@ -31,14 +34,12 @@ public class PositionPerformanceService {
         TimeSeries timeSeries = TimeSeries.getById(request.timeSeries());
         transactionRepository.findTransactions(investor.getId())
                 .forEach(t -> {
-                    populatePositions(t.getAsset().getTicker(), previousPerf.getQuantity(), previousPerf.getPurchasingPrice(),
-                            previousPerf.getTradingFees(), timeSeries, t.getTransaction_date());
                     onTickerChangedAction(timeSeries, t.getAsset().getTicker());
+                    populatePositions(t.getAsset().getTicker(), previousPerf.getQuantity(), previousPerf.getInvestedValue(), timeSeries, t.getTransaction_date());
                     this.setPreviousPerf(t);
                 });
         //populate from now to last transaction
-        populatePositions(previousPerf.getTicker(), previousPerf.getQuantity(), previousPerf.getPurchasingPrice(),
-                previousPerf.getTradingFees(), timeSeries, LocalDate.now().plusDays(1));
+        populatePositions(previousPerf.getTicker(), previousPerf.getQuantity(), previousPerf.getInvestedValue(), timeSeries, LocalDate.now().plusDays(1));
         this.positionsMap.putAll(positionPerfSummaryService.generateOverallPosition(timeSeries, this.positionsMap));
         List<PostionPerformanceResponse> list = new ArrayList<>(this.positionsMap.entrySet().stream()
                 .map(this::convertPositionMapToResponse)
@@ -52,8 +53,7 @@ public class PositionPerformanceService {
 
     private void setPreviousPerf(Transaction t) {
         previousPerf.setQuantity(afterTransactionQuantityCalc(previousPerf.getQuantity(), t.getTransaction_quantity(), t.getTransactionType()));
-        previousPerf.setPurchasingPrice(t.getPurchase_price());
-        previousPerf.setTradingFees(t.getTrading_fees());
+        previousPerf.setInvestedValue(previousPerf.getQuantity().multiply(t.getPurchase_price()).add(t.getTrading_fees()));
         previousPerf.setTicker(t.getAsset().getTicker());
     }
 
@@ -65,15 +65,14 @@ public class PositionPerformanceService {
         }
     }
 
-    private void populatePositions(String ticker, BigDecimal afterTransQuantity, BigDecimal purchasingPrice,
-                                   BigDecimal fee, TimeSeries timeSeries, LocalDate date) {
+    private void populatePositions(String ticker, BigDecimal afterTransQuantity, BigDecimal investedValue, TimeSeries timeSeries, LocalDate date) {
         while (LocalDate.now().minusMonths(timeSeries.getSerieInMonth()).isBefore(date)) {
             PositionPerfKey key = new PositionPerfKey(date, ticker);
             if (this.positionsMap.containsKey(key)) {
                 break;
             }
             PositionPerfValue posValue = new PositionPerfValue(afterTransQuantity);
-            posValue.setInvestedValue(posValue.getInvestedValue().add(afterTransQuantity.multiply(purchasingPrice)).add(fee));
+            posValue.setInvestedValue(investedValue);
             try {
                 posValue.setMarketValue(afterTransQuantity.multiply(priceMap.get(key)));
             } catch (NullPointerException e) {
@@ -88,12 +87,11 @@ public class PositionPerformanceService {
     private void onTickerChangedAction(TimeSeries timeSeries, String ticker) {
         if (!ticker.equals(previousPerf.getTicker())) {
             if (previousPerf.getTicker() != null) {
-                populatePositions(previousPerf.getTicker(), previousPerf.getQuantity(), previousPerf.getPurchasingPrice(),
-                        previousPerf.getTradingFees(), timeSeries, LocalDate.now().plusDays(1));
+                populatePositions(previousPerf.getTicker(), previousPerf.getQuantity(), previousPerf.getInvestedValue(), timeSeries, LocalDate.now().plusDays(1));
             }
             priceMap = financialDataProvider.retrieveStockData(ticker, timeSeries.getTimeSpan(), timeSeries.getMultiplier(),
                     LocalDate.now().minusMonths(timeSeries.getSerieInMonth()));
-            previousPerf.setQuantity(BigDecimal.ZERO);
+            previousPerf.clearValues();
         }
     }
 
@@ -110,6 +108,7 @@ public class PositionPerformanceService {
     private void clearVariables() {
         this.positionsMap.clear();
         this.previousPerf = new PostionPerformanceResponse();
+        this.priceMap.clear();
     }
 }
 

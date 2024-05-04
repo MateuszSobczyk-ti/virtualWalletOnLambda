@@ -3,7 +3,7 @@ package com.sobczyk.walletMicroservices.securtiy;
 import com.sobczyk.walletMicroservices.dto.requests.AuthenticationRequest;
 import com.sobczyk.walletMicroservices.dto.responses.AuthenticationResponse;
 import com.sobczyk.walletMicroservices.dto.InvestorDto;
-import com.sobczyk.walletMicroservices.dto.RegisterRequest;
+import com.sobczyk.walletMicroservices.dto.requests.RegisterRequest;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;

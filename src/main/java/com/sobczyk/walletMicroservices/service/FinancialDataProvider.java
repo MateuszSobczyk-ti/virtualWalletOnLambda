@@ -1,5 +1,6 @@
 package com.sobczyk.walletMicroservices.service;
 
+import com.sobczyk.walletMicroservices.position.performance.PositionPerfKey;
 import io.polygon.kotlin.sdk.rest.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
