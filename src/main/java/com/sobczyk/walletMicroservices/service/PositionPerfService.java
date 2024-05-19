@@ -131,6 +131,7 @@ public class PositionPerfService {
                 .quantity(entry.getValue().getQuantity())
                 .marketValue(entry.getValue().getMarketValue())
                 .investedValue(entry.getValue().getInvestedValue())
+                .TWR(entry.getValue().getTWR())
                 .build();
     }
 

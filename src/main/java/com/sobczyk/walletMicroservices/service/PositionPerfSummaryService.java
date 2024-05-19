@@ -6,6 +6,7 @@ import com.sobczyk.walletMicroservices.position.performance.TimeSeries;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,6 +17,9 @@ public class PositionPerfSummaryService {
     public static final String TICKER_OVERALL = "OVERALL";
     public static final String TICKER_DEPOSITED = "_DEPOSITED";
     public static final String TICKER_CASH = "CASH";
+
+    BigDecimal previousMarketValue = null;
+    BigDecimal previousTWR = BigDecimal.ONE;
 
     public Map<PositionPerfKey, PositionPerfValue> generateOverallPosition(TimeSeries timeSeries, Map<PositionPerfKey,
             PositionPerfValue> positionsMap) {
@@ -37,13 +41,17 @@ public class PositionPerfSummaryService {
                             ovValue.setMarketValue(ovValue.getMarketValue().add(p.getValue().getMarketValue()));
                         }
                     });
-            //calculate available cash at account
-            cashValue.setMarketValue(cashValue.getQuantity().add(ovValue.getInvestedValue().negate()));
-            ovValue.setMarketValue(ovValue.getMarketValue().add(cashValue.getMarketValue()));
             if (ovValue.isTradingDay()) {
                 //calculate cash flow
                 cashValue.setInvestedValue(cashValue.getQuantity().add(previousDeposited.negate()));
                 previousDeposited = cashValue.getQuantity();
+                //calculate available cash at account
+                cashValue.setMarketValue(cashValue.getQuantity().add(ovValue.getInvestedValue().negate()));
+                ovValue.setMarketValue(ovValue.getMarketValue().add(cashValue.getMarketValue()));
+                BigDecimal twr = this.calculateTwr(ovValue, cashValue);
+                ovValue.setTWR(twr.multiply(BigDecimal.valueOf(100)).setScale(2, RoundingMode.HALF_DOWN));
+                previousMarketValue = ovValue.getMarketValue();
+                previousTWR = twr;
                 positionsMap.put(new PositionPerfKey(date, TICKER_OVERALL), ovValue);
                 positionsMap.put(new PositionPerfKey(date, TICKER_CASH), cashValue);
                 currentPositionsMap.clear();
@@ -52,6 +60,17 @@ public class PositionPerfSummaryService {
             }
             date = date.plusDays(1);
         }
+        previousTWR = BigDecimal.ZERO;
+        previousMarketValue = null;
         return currentPositionsMap;
+    }
+
+    private BigDecimal calculateTwr(PositionPerfValue ovValue, PositionPerfValue cashValue) {
+        if (!ovValue.getMarketValue().add(cashValue.getInvestedValue()).equals(BigDecimal.ZERO) && previousMarketValue != null) {
+            return previousTWR.multiply(ovValue.getMarketValue().divide(previousMarketValue.add(cashValue.getInvestedValue()),
+                    7, RoundingMode.HALF_EVEN)).setScale(10, RoundingMode.HALF_EVEN);
+        } else {
+            return BigDecimal.ONE;
+        }
     }
 }
