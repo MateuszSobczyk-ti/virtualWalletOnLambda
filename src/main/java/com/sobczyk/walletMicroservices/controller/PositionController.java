@@ -2,7 +2,8 @@ package com.sobczyk.walletMicroservices.controller;
 
 import com.sobczyk.walletMicroservices.dto.requests.PositionPerformanceRequest;
 import com.sobczyk.walletMicroservices.dto.requests.TransactionRequest;
-import com.sobczyk.walletMicroservices.dto.responses.PostionPerformanceResponse;
+import com.sobczyk.walletMicroservices.dto.PositionPerformanceDto;
+import com.sobczyk.walletMicroservices.dto.responses.PositionPerformanceResponse;
 import com.sobczyk.walletMicroservices.entity.Investor;
 import com.sobczyk.walletMicroservices.service.PositionPerfService;
 import com.sobczyk.walletMicroservices.service.TransactionService;
@@ -29,8 +30,8 @@ public class PositionController {
     }
 
     @GetMapping("/performance")
-    public ResponseEntity<List<PostionPerformanceResponse>> getPositionPerformance(@AuthenticationPrincipal Investor investor,
-                                                                                   @RequestBody PositionPerformanceRequest request) {
+    public ResponseEntity<PositionPerformanceResponse> getPositionPerformance(@AuthenticationPrincipal Investor investor,
+                                                                                    @RequestBody PositionPerformanceRequest request) {
         return positionPerfService.getPositionPerformance(investor, request);
     }
 }

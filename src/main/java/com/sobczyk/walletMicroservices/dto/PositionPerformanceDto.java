@@ -1,4 +1,4 @@
-package com.sobczyk.walletMicroservices.dto.responses;
+package com.sobczyk.walletMicroservices.dto;
 
 import lombok.*;
 
@@ -9,7 +9,7 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @AllArgsConstructor
-public class PostionPerformanceResponse {
+public class PositionPerformanceDto {
     private LocalDate date;
     private String ticker;
     private BigDecimal quantity;
@@ -17,7 +17,7 @@ public class PostionPerformanceResponse {
     private BigDecimal marketValue;
     private BigDecimal TWR;
 
-    public PostionPerformanceResponse() {
+    public PositionPerformanceDto() {
         clearValues();
     }
 

@@ -17,10 +17,12 @@ public class PositionPerfSummaryService {
     public static final String TICKER_DEPOSITED = "_DEPOSITED";
     public static final String TICKER_CASH = "CASH";
 
-    public Map<PositionPerfKey, PositionPerfValue> generateOverallPosition(TimeSeries timeSeries, Map<PositionPerfKey, PositionPerfValue> positionsMap) {
-        Map<PositionPerfKey, PositionPerfValue> summaryPositionsMap = new HashMap<>();
-        LocalDate date = LocalDate.now();
-        while (LocalDate.now().minusMonths(timeSeries.getSerieInMonth()).isBefore(date)) {
+    public Map<PositionPerfKey, PositionPerfValue> generateOverallPosition(TimeSeries timeSeries, Map<PositionPerfKey,
+            PositionPerfValue> positionsMap) {
+        Map<PositionPerfKey, PositionPerfValue> currentPositionsMap = new HashMap<>();
+        LocalDate date = LocalDate.now().minusMonths(timeSeries.getSerieInMonth());
+        BigDecimal previousDeposited = BigDecimal.ZERO;
+        while (date.isBefore(LocalDate.now())) {
             PositionPerfValue ovValue = new PositionPerfValue(BigDecimal.ZERO);
             PositionPerfValue cashValue = new PositionPerfValue(BigDecimal.ZERO);
             LocalDate finalDate = date;
@@ -35,16 +37,21 @@ public class PositionPerfSummaryService {
                             ovValue.setMarketValue(ovValue.getMarketValue().add(p.getValue().getMarketValue()));
                         }
                     });
-            cashValue.setInvestedValue(cashValue.getQuantity().add(ovValue.getInvestedValue().negate()));
+            //calculate available cash at account
             cashValue.setMarketValue(cashValue.getQuantity().add(ovValue.getInvestedValue().negate()));
             ovValue.setMarketValue(ovValue.getMarketValue().add(cashValue.getMarketValue()));
             if (ovValue.isTradingDay()) {
-                summaryPositionsMap.put(new PositionPerfKey(date, TICKER_OVERALL), ovValue);
-                summaryPositionsMap.put(new PositionPerfKey(date, TICKER_CASH), cashValue);
-                ovValue.setTradingDay(false);
+                //calculate cash flow
+                cashValue.setInvestedValue(cashValue.getQuantity().add(previousDeposited.negate()));
+                previousDeposited = cashValue.getQuantity();
+                positionsMap.put(new PositionPerfKey(date, TICKER_OVERALL), ovValue);
+                positionsMap.put(new PositionPerfKey(date, TICKER_CASH), cashValue);
+                currentPositionsMap.clear();
+                currentPositionsMap.put(new PositionPerfKey(date, TICKER_OVERALL), ovValue);
+                currentPositionsMap.put(new PositionPerfKey(date, TICKER_CASH), cashValue);
             }
-            date = date.minusDays(1);
+            date = date.plusDays(1);
         }
-        return summaryPositionsMap;
+        return currentPositionsMap;
     }
 }
