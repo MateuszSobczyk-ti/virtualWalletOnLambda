@@ -49,7 +49,7 @@ public class PositionPerfSummaryService {
                 cashValue.setMarketValue(cashValue.getQuantity().add(ovValue.getInvestedValue().negate()));
                 ovValue.setMarketValue(ovValue.getMarketValue().add(cashValue.getMarketValue()));
                 BigDecimal twr = this.calculateTwr(ovValue, cashValue);
-                ovValue.setTWR(twr.multiply(BigDecimal.valueOf(100)).setScale(2, RoundingMode.HALF_DOWN));
+                ovValue.setTWR(twr.multiply(BigDecimal.valueOf(100)).setScale(2, RoundingMode.HALF_DOWN).add(BigDecimal.valueOf(100).negate()));
                 previousMarketValue = ovValue.getMarketValue();
                 previousTWR = twr;
                 positionsMap.put(new PositionPerfKey(date, TICKER_OVERALL), ovValue);
@@ -66,7 +66,7 @@ public class PositionPerfSummaryService {
     }
 
     private BigDecimal calculateTwr(PositionPerfValue ovValue, PositionPerfValue cashValue) {
-        if (!ovValue.getMarketValue().add(cashValue.getInvestedValue()).equals(BigDecimal.ZERO) && previousMarketValue != null) {
+        if (previousMarketValue != null && previousMarketValue.add(cashValue.getInvestedValue()).compareTo(BigDecimal.ZERO) != 0) {
             return previousTWR.multiply(ovValue.getMarketValue().divide(previousMarketValue.add(cashValue.getInvestedValue()),
                     7, RoundingMode.HALF_EVEN)).setScale(10, RoundingMode.HALF_EVEN);
         } else {
