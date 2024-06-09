@@ -46,18 +46,7 @@ public class PositionPerfService {
         //populate from now to last transaction
         populatePositions(previousPerf.getTicker(), previousPerf.getQuantity(), previousPerf.getInvestedValue(),
                 timeSeries, LocalDate.now().plusDays(1), true);
-        response.getCurrentPositions().addAll(
-                positionPerfSummaryService.generateOverallPosition(timeSeries, this.positionsMap).entrySet().stream()
-                .map(this::convertPositionMapEntryToDto)
-                .toList());
-        List<PositionPerformanceDto> allTimePositions = new ArrayList<>(this.positionsMap.entrySet().stream()
-                .map(this::convertPositionMapEntryToDto)
-                .toList());
-        //comparing to delete
-        allTimePositions.sort(Comparator
-                .comparing(PositionPerformanceDto::getTicker)
-                .thenComparing(PositionPerformanceDto::getDate));
-        response.setAllTimePositions(allTimePositions);
+        this.summarizePortfolio(timeSeries);
         return ResponseEntity.ok().body(response);
     }
 
@@ -77,11 +66,8 @@ public class PositionPerfService {
 
     private void populatePositions(String ticker, BigDecimal afterTransQuantity, BigDecimal investedValue,
                                    TimeSeries timeSeries, LocalDate date, boolean lastPosition) {
-        while (LocalDate.now().minusMonths(timeSeries.getSerieInMonth()).isBefore(date)) {
+        while (LocalDate.now().minusMonths(timeSeries.getSerieInMonth()).isBefore(date) || lastPosition) {
             PositionPerfKey key = new PositionPerfKey(date, ticker);
-            if (this.positionsMap.containsKey(key)) {
-                break;
-            }
             PositionPerfValue posValue = new PositionPerfValue(afterTransQuantity);
             posValue.setInvestedValue(investedValue);
             if (priceMap.get(key) != null) {
@@ -89,6 +75,12 @@ public class PositionPerfService {
             } else {
                 date = date.minusDays(1);
                 continue;
+            }
+            if (this.positionsMap.containsKey(key)) {
+                if (lastPosition) {
+                    this.response.getCurrentPositions().add(convertPositionMapEntryToDto(new AbstractMap.SimpleEntry<>(key, posValue)));
+                }
+                break;
             }
             this.positionsMap.put(key, posValue);
             if (lastPosition) {
@@ -109,6 +101,18 @@ public class PositionPerfService {
                     LocalDate.now().minusMonths(timeSeries.getSerieInMonth()));
             previousPerf.clearValues();
         }
+    }
+
+    private void summarizePortfolio(TimeSeries timeSeries) {
+        positionPerfSummaryService.generateOverallPosition(timeSeries, this.positionsMap);
+        response.setCash(positionPerfSummaryService.cashValue);
+        response.setOverall(positionPerfSummaryService.getOvValue());
+        response.setAllTimePositions(new ArrayList<>(this.positionsMap.entrySet().stream()
+                .map(this::convertPositionMapEntryToDto)
+                .toList()));
+        response.setAllTimeOverall(new ArrayList<>(positionPerfSummaryService.getAllTimeOverall().entrySet().stream()
+                .map(this::convertPositionMapEntryToDto)
+                .toList()));
     }
 
     private void addTransactionToResponse(Transaction transaction) {

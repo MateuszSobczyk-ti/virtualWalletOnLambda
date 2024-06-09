@@ -3,66 +3,71 @@ package com.sobczyk.walletMicroservices.service;
 import com.sobczyk.walletMicroservices.position.performance.PositionPerfKey;
 import com.sobczyk.walletMicroservices.position.performance.PositionPerfValue;
 import com.sobczyk.walletMicroservices.position.performance.TimeSeries;
+import lombok.Getter;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 @Service
+@Getter
 public class PositionPerfSummaryService {
 
     public static final String TICKER_OVERALL = "OVERALL";
     public static final String TICKER_DEPOSITED = "_DEPOSITED";
-    public static final String TICKER_CASH = "CASH";
 
     BigDecimal previousMarketValue = null;
     BigDecimal previousTWR = BigDecimal.ONE;
+    PositionPerfValue ovValue;
+    PositionPerfValue cashValue;
+    Map<PositionPerfKey, PositionPerfValue> allTimeOverall;
 
-    public Map<PositionPerfKey, PositionPerfValue> generateOverallPosition(TimeSeries timeSeries, Map<PositionPerfKey,
-            PositionPerfValue> positionsMap) {
-        Map<PositionPerfKey, PositionPerfValue> currentPositionsMap = new HashMap<>();
+    public void generateOverallPosition(TimeSeries timeSeries, Map<PositionPerfKey, PositionPerfValue> positionsMap) {
+        allTimeOverall = new HashMap<>();
+        Set<PositionPerfKey> positionsToRemove = new HashSet<>();
         LocalDate date = LocalDate.now().minusMonths(timeSeries.getSerieInMonth());
         BigDecimal previousDeposited = BigDecimal.ZERO;
         while (date.isBefore(LocalDate.now())) {
-            PositionPerfValue ovValue = new PositionPerfValue(BigDecimal.ZERO);
-            PositionPerfValue cashValue = new PositionPerfValue(BigDecimal.ZERO);
+            PositionPerfValue ovValueTemp = new PositionPerfValue(BigDecimal.ZERO);
+            PositionPerfValue cashValueTemp = new PositionPerfValue(BigDecimal.ZERO);
             LocalDate finalDate = date;
             positionsMap.entrySet().stream()
                     .filter(p -> p.getKey().getDate().equals(finalDate))
                     .forEach(p -> {
-                        ovValue.setTradingDay(true);
+                        ovValueTemp.setTradingDay(true);
                         if (TICKER_DEPOSITED.equals(p.getKey().getTicker())) {
-                            cashValue.setQuantity(p.getValue().getInvestedValue());
+                            cashValueTemp.setQuantity(p.getValue().getInvestedValue());
+                            positionsToRemove.add(p.getKey());
                         } else {
-                            ovValue.setInvestedValue(ovValue.getInvestedValue().add(p.getValue().getInvestedValue()));
-                            ovValue.setMarketValue(ovValue.getMarketValue().add(p.getValue().getMarketValue()));
+                            ovValueTemp.setInvestedValue(ovValueTemp.getInvestedValue().add(p.getValue().getInvestedValue()));
+                            ovValueTemp.setMarketValue(ovValueTemp.getMarketValue().add(p.getValue().getMarketValue()));
                         }
                     });
-            if (ovValue.isTradingDay()) {
+            if (ovValueTemp.isTradingDay()) {
                 //calculate cash flow
-                cashValue.setInvestedValue(cashValue.getQuantity().add(previousDeposited.negate()));
-                previousDeposited = cashValue.getQuantity();
+                cashValueTemp.setInvestedValue(cashValueTemp.getQuantity().add(previousDeposited.negate()));
+                previousDeposited = cashValueTemp.getQuantity();
                 //calculate available cash at account
-                cashValue.setMarketValue(cashValue.getQuantity().add(ovValue.getInvestedValue().negate()));
-                ovValue.setMarketValue(ovValue.getMarketValue().add(cashValue.getMarketValue()));
-                BigDecimal twr = this.calculateTwr(ovValue, cashValue);
-                ovValue.setTWR(twr.multiply(BigDecimal.valueOf(100)).setScale(2, RoundingMode.HALF_DOWN).add(BigDecimal.valueOf(100).negate()));
-                previousMarketValue = ovValue.getMarketValue();
+                cashValueTemp.setMarketValue(cashValueTemp.getQuantity().add(ovValueTemp.getInvestedValue().negate()));
+                ovValueTemp.setMarketValue(ovValueTemp.getMarketValue().add(cashValueTemp.getMarketValue()));
+                BigDecimal twr = this.calculateTwr(ovValueTemp, cashValueTemp);
+                ovValueTemp.setTWR(twr.multiply(BigDecimal.valueOf(100)).setScale(2, RoundingMode.HALF_DOWN).add(BigDecimal.valueOf(100).negate()));
+                previousMarketValue = ovValueTemp.getMarketValue();
                 previousTWR = twr;
-                positionsMap.put(new PositionPerfKey(date, TICKER_OVERALL), ovValue);
-                positionsMap.put(new PositionPerfKey(date, TICKER_CASH), cashValue);
-                currentPositionsMap.clear();
-                currentPositionsMap.put(new PositionPerfKey(date, TICKER_OVERALL), ovValue);
-                currentPositionsMap.put(new PositionPerfKey(date, TICKER_CASH), cashValue);
+                allTimeOverall.put(new PositionPerfKey(date, TICKER_OVERALL), ovValueTemp);
+                ovValue = ovValueTemp;
+                cashValue = cashValueTemp;
             }
             date = date.plusDays(1);
         }
+        positionsMap.keySet().removeAll(positionsToRemove);
         previousTWR = BigDecimal.ZERO;
         previousMarketValue = null;
-        return currentPositionsMap;
     }
 
     private BigDecimal calculateTwr(PositionPerfValue ovValue, PositionPerfValue cashValue) {

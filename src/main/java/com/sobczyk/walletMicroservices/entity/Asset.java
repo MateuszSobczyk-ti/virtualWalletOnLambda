@@ -13,6 +13,8 @@ import lombok.*;
 public class Asset {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     private String ticker;
     @Enumerated(EnumType.STRING)
     private AssetType assetType;
