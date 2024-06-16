@@ -130,7 +130,7 @@ public class PositionPerfService {
 
     private PositionPerformanceDto convertPositionMapEntryToDto(Map.Entry<PositionPerfKey, PositionPerfValue> entry) {
         return PositionPerformanceDto.builder()
-                .date(entry.getKey().getDate().minusDays(1))
+                .date(entry.getKey().getDate())
                 .ticker(entry.getKey().getTicker())
                 .quantity(entry.getValue().getQuantity())
                 .marketValue(entry.getValue().getMarketValue())

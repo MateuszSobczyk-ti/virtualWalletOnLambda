@@ -1,6 +1,7 @@
 package com.sobczyk.walletMicroservices.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -23,6 +24,7 @@ public class Investor implements UserDetails {
     private Long id;
     private String firstname;
     private String lastname;
+    @Email(message = "email not valid")
     private String email;
     private String password;
     @Enumerated(EnumType.STRING)

@@ -2,7 +2,6 @@ package com.sobczyk.walletMicroservices.controller;
 
 import com.sobczyk.walletMicroservices.dto.requests.PositionPerformanceRequest;
 import com.sobczyk.walletMicroservices.dto.requests.TransactionRequest;
-import com.sobczyk.walletMicroservices.dto.PositionPerformanceDto;
 import com.sobczyk.walletMicroservices.dto.responses.PositionPerformanceResponse;
 import com.sobczyk.walletMicroservices.entity.Investor;
 import com.sobczyk.walletMicroservices.service.PositionPerfService;
@@ -11,13 +10,13 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @AllArgsConstructor
 @RestController
 @RequestMapping("/api/v1/position")
+@Validated
 public class PositionController {
 
     private final TransactionService transactionService;

@@ -5,6 +5,7 @@ import com.sobczyk.walletMicroservices.position.performance.PositionPerfValue;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,7 +21,11 @@ public class PositionPerformanceResponse {
     private List<TransactionResponse> transactions;
 
     public PositionPerformanceResponse() {
+        this.allTimePositions = new ArrayList<>();
         this.currentPositions = new ArrayList<>();
+        this.allTimeOverall = new ArrayList<>();
+        this.overall = new PositionPerfValue(BigDecimal.ZERO);
+        this.cash = new PositionPerfValue(BigDecimal.ZERO);
         this.transactions = new ArrayList<>();
     }
 }

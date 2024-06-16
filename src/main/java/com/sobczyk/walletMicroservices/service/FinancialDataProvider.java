@@ -1,8 +1,10 @@
 package com.sobczyk.walletMicroservices.service;
 
+import com.sobczyk.walletMicroservices.handler.TooManyApiCallsException;
 import com.sobczyk.walletMicroservices.position.performance.PositionPerfKey;
 import io.polygon.kotlin.sdk.rest.*;
-import org.springframework.beans.factory.annotation.Value;
+import io.polygon.kotlin.sdk.rest.stocks.PreviousCloseDTO;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -13,37 +15,32 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Service
+@RequiredArgsConstructor
 public class FinancialDataProvider {
 
-    @Value("${polygon.key}")
-    private String POLYGON_KEY;
-
+    private final PolygonApiClient polygonApiClient;
     private final Map<PositionPerfKey, BigDecimal> priceMap = new HashMap<>();
     private String ticker;
 
     public Map<PositionPerfKey, BigDecimal> retrieveStockData(String ticker, String timespan, Long multiplier, LocalDate dateFrom) {
         this.ticker = ticker;
-        PolygonRestClient client = new PolygonRestClient(POLYGON_KEY);
-        AggregatesDTO aggs = client.getAggregatesBlocking(
-                new AggregatesParametersBuilder()
-                        .ticker(ticker)
-                        .timespan(timespan)
-                        .multiplier(multiplier)
-                        .fromDate(dateFrom.toString())
-                        .toDate(LocalDate.now().toString())
-                        .build()
-        );
         if (PositionPerfSummaryService.TICKER_DEPOSITED.equals(ticker)) {
             this.generateCashPrice();
         } else {
-            aggs.getResults().forEach(this::convertToMap);
+            AggregatesDTO aggs = this.polygonApiClient.getAggregatesBlocking(ticker, timespan, multiplier, dateFrom);
+            PreviousCloseDTO previousCloseDTO = this.polygonApiClient.getPreviousCloseDto(ticker);
+            if (("ERROR").equals(aggs.getStatus()) || ("ERROR").equals(previousCloseDTO.getStatus())) {
+                throw new TooManyApiCallsException();
+            }
+            aggs.getResults().forEach(this::addToMap);
+            previousCloseDTO.getResults().stream().findFirst().ifPresent(this::addToMap);
         }
         return priceMap;
     }
 
-    private void convertToMap(AggregateDTO aggDto) {
-        this.priceMap.put(new PositionPerfKey(this.convertToDate(aggDto.component8()), this.ticker),
-                BigDecimal.valueOf(aggDto.component5()));
+    private void addToMap(AggregateDTO agg) {
+        this.priceMap.put(new PositionPerfKey(this.convertToDate(agg.getTimestampMillis()), this.ticker),
+                BigDecimal.valueOf(agg.getClose()));
     }
 
     private LocalDate convertToDate(Long mSec) {
