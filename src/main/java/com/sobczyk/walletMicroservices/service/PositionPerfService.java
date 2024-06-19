@@ -26,6 +26,7 @@ public class PositionPerfService {
     private final TransactionRepository transactionRepository;
     private final FinancialDataProvider financialDataProvider;
     private final PositionPerfSummaryService positionPerfSummaryService;
+    private final FinancialNewsProvider financialNewsProvider;
 
     private final Map<PositionPerfKey, PositionPerfValue> positionsMap = new HashMap<>();
     private Map<PositionPerfKey, BigDecimal> priceMap = new HashMap<>();
@@ -79,12 +80,14 @@ public class PositionPerfService {
             if (this.positionsMap.containsKey(key)) {
                 if (lastPosition) {
                     this.response.getCurrentPositions().add(convertPositionMapEntryToDto(new AbstractMap.SimpleEntry<>(key, posValue)));
+                    this.response.setPositionsNews(financialNewsProvider.getFinancialNews(ticker));
                 }
                 break;
             }
             this.positionsMap.put(key, posValue);
             if (lastPosition) {
                 this.response.getCurrentPositions().add(convertPositionMapEntryToDto(new AbstractMap.SimpleEntry<>(key, posValue)));
+                this.response.setPositionsNews(financialNewsProvider.getFinancialNews(ticker));
                 lastPosition = false;
             }
             date = date.minusDays(1);

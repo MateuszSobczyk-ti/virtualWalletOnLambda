@@ -19,6 +19,7 @@ public class PositionPerformanceResponse {
     private PositionPerfValue overall;
     private PositionPerfValue cash;
     private List<TransactionResponse> transactions;
+    private List<FinancialNewsResponse> positionsNews;
 
     public PositionPerformanceResponse() {
         this.allTimePositions = new ArrayList<>();
@@ -27,5 +28,6 @@ public class PositionPerformanceResponse {
         this.overall = new PositionPerfValue(BigDecimal.ZERO);
         this.cash = new PositionPerfValue(BigDecimal.ZERO);
         this.transactions = new ArrayList<>();
+        this.positionsNews = new ArrayList<>();
     }
 }
