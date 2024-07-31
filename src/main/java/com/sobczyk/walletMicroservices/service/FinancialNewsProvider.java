@@ -18,6 +18,7 @@ public class FinancialNewsProvider {
         return Objects.requireNonNull(this.polygonApiClient.getTickerNews(ticker)
                         .getResults())
                 .stream()
+                .limit(3)
                 .map(this::mapToFinancialNewsResponse)
                 .toList();
     }

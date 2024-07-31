@@ -46,14 +46,14 @@ public class PositionPerfService {
                 });
         //populate from now to last transaction
         populatePositions(previousPerf.getTicker(), previousPerf.getQuantity(), previousPerf.getInvestedValue(),
-                timeSeries, LocalDate.now().plusDays(1), true);
+                timeSeries, LocalDate.now().plusDays(1), !this.response.getTransactions().isEmpty());
         this.summarizePortfolio(timeSeries);
         return ResponseEntity.ok().body(response);
     }
 
     private void setPreviousPerf(Transaction t) {
         previousPerf.setQuantity(afterTransactionQuantityCalc(previousPerf.getQuantity(), t.getTransaction_quantity(), t.getTransactionType()));
-        previousPerf.setInvestedValue(previousPerf.getQuantity().multiply(t.getPurchase_price()).add(t.getTrading_fees()));
+        previousPerf.setInvestedValue(previousPerf.getQuantity().multiply(t.getPurchase_price()).add(t.getTrading_fees() == null ? BigDecimal.ZERO : t.getTrading_fees()));
         previousPerf.setTicker(t.getAsset().getTicker());
     }
 
@@ -67,7 +67,7 @@ public class PositionPerfService {
 
     private void populatePositions(String ticker, BigDecimal afterTransQuantity, BigDecimal investedValue,
                                    TimeSeries timeSeries, LocalDate date, boolean lastPosition) {
-        while (LocalDate.now().minusMonths(timeSeries.getSerieInMonth()).isBefore(date) || lastPosition) {
+        while ((LocalDate.now().minusMonths(timeSeries.getSerieInMonth()).isBefore(date) || lastPosition) && !this.priceMap.isEmpty()) {
             PositionPerfKey key = new PositionPerfKey(date, ticker);
             PositionPerfValue posValue = new PositionPerfValue(afterTransQuantity);
             posValue.setInvestedValue(investedValue);
@@ -80,14 +80,14 @@ public class PositionPerfService {
             if (this.positionsMap.containsKey(key)) {
                 if (lastPosition) {
                     this.response.getCurrentPositions().add(convertPositionMapEntryToDto(new AbstractMap.SimpleEntry<>(key, posValue)));
-                    this.response.setPositionsNews(financialNewsProvider.getFinancialNews(ticker));
+                    this.response.getPositionsNews().addAll(financialNewsProvider.getFinancialNews(ticker));
                 }
                 break;
             }
             this.positionsMap.put(key, posValue);
             if (lastPosition) {
                 this.response.getCurrentPositions().add(convertPositionMapEntryToDto(new AbstractMap.SimpleEntry<>(key, posValue)));
-                this.response.setPositionsNews(financialNewsProvider.getFinancialNews(ticker));
+                this.response.getPositionsNews().addAll(financialNewsProvider.getFinancialNews(ticker));
                 lastPosition = false;
             }
             date = date.minusDays(1);

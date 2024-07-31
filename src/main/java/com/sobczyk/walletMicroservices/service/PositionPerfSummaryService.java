@@ -21,14 +21,14 @@ public class PositionPerfSummaryService {
     public static final String TICKER_OVERALL = "OVERALL";
     public static final String TICKER_DEPOSITED = "_DEPOSITED";
 
-    BigDecimal previousMarketValue = null;
-    BigDecimal previousTWR = BigDecimal.ONE;
+    BigDecimal previousMarketValue;
+    BigDecimal previousTWR;
     PositionPerfValue ovValue;
     PositionPerfValue cashValue;
     Map<PositionPerfKey, PositionPerfValue> allTimeOverall;
 
     public void generateOverallPosition(TimeSeries timeSeries, Map<PositionPerfKey, PositionPerfValue> positionsMap) {
-        allTimeOverall = new HashMap<>();
+        clearVariables();
         Set<PositionPerfKey> positionsToRemove = new HashSet<>();
         LocalDate date = LocalDate.now().minusMonths(timeSeries.getSerieInMonth());
         BigDecimal previousDeposited = BigDecimal.ZERO;
@@ -66,8 +66,6 @@ public class PositionPerfSummaryService {
             date = date.plusDays(1);
         }
         positionsMap.keySet().removeAll(positionsToRemove);
-        previousTWR = BigDecimal.ZERO;
-        previousMarketValue = null;
     }
 
     private BigDecimal calculateTwr(PositionPerfValue ovValue, PositionPerfValue cashValue) {
@@ -77,5 +75,13 @@ public class PositionPerfSummaryService {
         } else {
             return BigDecimal.ONE;
         }
+    }
+
+    private void clearVariables() {
+        allTimeOverall = new HashMap<>();
+        previousMarketValue = null;
+        previousTWR = BigDecimal.ONE;
+        ovValue = new PositionPerfValue(BigDecimal.ZERO);
+        cashValue = new PositionPerfValue(BigDecimal.ZERO);
     }
 }
