@@ -1,7 +1,7 @@
 package com.sobczyk.walletMicroservices.service;
 
-import com.sobczyk.walletMicroservices.dto.requests.PositionPerformanceRequest;
 import com.sobczyk.walletMicroservices.dto.PositionPerformanceDto;
+import com.sobczyk.walletMicroservices.dto.requests.PositionPerformanceRequest;
 import com.sobczyk.walletMicroservices.dto.responses.PositionPerformanceResponse;
 import com.sobczyk.walletMicroservices.dto.responses.TransactionResponse;
 import com.sobczyk.walletMicroservices.entity.Investor;
@@ -11,13 +11,16 @@ import com.sobczyk.walletMicroservices.position.performance.PositionPerfKey;
 import com.sobczyk.walletMicroservices.position.performance.PositionPerfValue;
 import com.sobczyk.walletMicroservices.position.performance.TimeSeries;
 import com.sobczyk.walletMicroservices.repository.TransactionRepository;
-import lombok.*;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor

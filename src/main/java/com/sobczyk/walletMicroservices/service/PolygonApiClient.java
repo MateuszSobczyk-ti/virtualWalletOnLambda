@@ -1,5 +1,9 @@
 package com.sobczyk.walletMicroservices.service;
-import io.polygon.kotlin.sdk.rest.*;
+
+import io.polygon.kotlin.sdk.rest.AggregatesDTO;
+import io.polygon.kotlin.sdk.rest.AggregatesParametersBuilder;
+import io.polygon.kotlin.sdk.rest.ComparisonQueryFilterParameters;
+import io.polygon.kotlin.sdk.rest.PolygonRestClient;
 import io.polygon.kotlin.sdk.rest.reference.TickerNewsParametersV2Builder;
 import io.polygon.kotlin.sdk.rest.reference.TickerNewsResponse;
 import io.polygon.kotlin.sdk.rest.stocks.PreviousCloseDTO;

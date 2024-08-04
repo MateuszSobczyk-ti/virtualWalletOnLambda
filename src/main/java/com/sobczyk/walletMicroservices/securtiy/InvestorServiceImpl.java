@@ -1,14 +1,13 @@
 package com.sobczyk.walletMicroservices.securtiy;
-import com.sobczyk.walletMicroservices.dto.requests.AuthenticationRequest;
-import com.sobczyk.walletMicroservices.dto.responses.AuthenticationResponse;
-import com.sobczyk.walletMicroservices.dto.requests.RegisterRequest;
-import com.sobczyk.walletMicroservices.entity.Investor;
+
 import com.sobczyk.walletMicroservices.dto.InvestorDto;
+import com.sobczyk.walletMicroservices.dto.requests.AuthenticationRequest;
+import com.sobczyk.walletMicroservices.dto.requests.RegisterRequest;
+import com.sobczyk.walletMicroservices.dto.responses.AuthenticationResponse;
+import com.sobczyk.walletMicroservices.entity.Investor;
 import com.sobczyk.walletMicroservices.entity.Role;
 import com.sobczyk.walletMicroservices.repository.InvestorRepository;
-
 import lombok.AllArgsConstructor;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;

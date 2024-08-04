@@ -2,7 +2,8 @@ package com.sobczyk.walletMicroservices.service;
 
 import com.sobczyk.walletMicroservices.handler.TooManyApiCallsException;
 import com.sobczyk.walletMicroservices.position.performance.PositionPerfKey;
-import io.polygon.kotlin.sdk.rest.*;
+import io.polygon.kotlin.sdk.rest.AggregateDTO;
+import io.polygon.kotlin.sdk.rest.AggregatesDTO;
 import io.polygon.kotlin.sdk.rest.stocks.PreviousCloseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
