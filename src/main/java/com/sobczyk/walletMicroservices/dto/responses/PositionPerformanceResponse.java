@@ -1,7 +1,7 @@
 package com.sobczyk.walletMicroservices.dto.responses;
 
 import com.sobczyk.walletMicroservices.dto.PositionPerformanceDto;
-import com.sobczyk.walletMicroservices.position.performance.PositionPerfValue;
+import com.sobczyk.walletMicroservices.dto.PositionPerfValue;
 import lombok.Getter;
 import lombok.Setter;
 

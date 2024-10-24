@@ -1,4 +1,4 @@
-package com.sobczyk.walletMicroservices.position.performance;
+package com.sobczyk.walletMicroservices.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -11,22 +11,11 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @ControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
-
-    @ExceptionHandler(value = TooManyApiCallsException.class)
-    public ResponseEntity<ErrorResponse> tooManyApiCalls() {
-        String errorMessage = ErrorCode.TOO_MANY_API_CALLS + LocalTime.now().plusMinutes(1)
-                .format(DateTimeFormatter.ofPattern("HH:mm:ss"));
-        log.warn(errorMessage);
-        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
-                .body(new ErrorResponse(HttpStatus.TOO_MANY_REQUESTS.value(), errorMessage));
-    }
 
     @ExceptionHandler(value = HttpRequestMethodNotSupportedException.class)
     public ResponseEntity<ErrorResponse> httpRequestMethodNotSupported(HttpRequestMethodNotSupportedException ex) {
