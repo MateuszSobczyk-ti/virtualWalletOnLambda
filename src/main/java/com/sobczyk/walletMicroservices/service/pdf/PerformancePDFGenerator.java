@@ -1,8 +1,7 @@
-package com.sobczyk.walletMicroservices.service;
+package com.sobczyk.walletMicroservices.service.pdf;
 
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.PdfPTable;
-import com.itextpdf.text.pdf.PdfWriter;
 import com.sobczyk.walletMicroservices.dto.PositionPerfValue;
 import com.sobczyk.walletMicroservices.dto.PositionPerformanceDto;
 import com.sobczyk.walletMicroservices.dto.responses.FinancialNewsResponse;
@@ -10,35 +9,26 @@ import com.sobczyk.walletMicroservices.dto.responses.PositionPerformanceResponse
 import com.sobczyk.walletMicroservices.dto.responses.TransactionResponse;
 import org.springframework.stereotype.Service;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
 
 @Service
-public class PerformancePDFGenerator {
-    public void generatePdf(PositionPerformanceResponse response, String outputPath) {
-        Document document = new Document();
-        try {
-            PdfWriter.getInstance(document, new FileOutputStream(outputPath));
+public class PerformancePDFGenerator extends PDFGenerator<PositionPerformanceResponse> {
 
-            document.open();
-            addTitlePage(document);
-            addPositionsTable(document, response.getCurrentPositions());
-            addSummary(document, response.getOverall(), response.getCash());
-            addTransactions(document, response.getTransactions());
-            addLinkedImage(document, response.getPositionsNews());
-            document.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void addTitlePage(Document document) throws DocumentException
-    {
+    @Override
+    public void addTitlePage(Document document) throws DocumentException {
         Paragraph title = new Paragraph("Portfolio Performance Report");
         title.setAlignment(Element.ALIGN_CENTER);
         document.add(title);
+    }
+
+    @Override
+    public void addContent(Document document, PositionPerformanceResponse response) throws DocumentException, IOException {
+        addPositionsTable(document, response.getCurrentPositions());
+        addSummary(document, response.getOverall(), response.getCash());
+        addTransactions(document, response.getTransactions());
+        addLinkedImage(document, response.getPositionsNews());
     }
 
     private void addPositionsTable(Document document, List<PositionPerformanceDto> positions) throws DocumentException {
